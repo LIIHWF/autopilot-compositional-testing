@@ -1,0 +1,11 @@
+py_library(
+    name = "context_lib",
+    srcs = ["context.py"],
+)
+
+py_library(
+    name = "context",
+    srcs = ["__init__.py"],
+    deps = [":context_lib"],
+    visibility = ["//visibility:public"],
+)

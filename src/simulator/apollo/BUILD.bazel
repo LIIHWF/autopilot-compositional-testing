@@ -1,0 +1,32 @@
+py_library(
+    name = "apollo_simulator_lib",
+    srcs = [
+        "apollo_vehicle_state.py",
+        "apollo_world_model.py",
+        "config.py",
+        "message.py",
+        "server.py",
+        "simulator.py",
+    ],
+    data = [
+        ":config.json"
+    ],
+    deps = [
+        "//src/common/libs/apollo/map/parser",
+        "//src/common/types",
+        "//src/semantic_model/geometry",
+        "//src/semantic_model/map/common",
+        "//src/semantic_model/map/hd_map",
+        "//src/semantic_model/map/hd_map:hd_map_py_pb2",
+        "//src/semantic_model/system_run",
+        "//src/semantic_model/system_state",
+        "//src/semantic_model/system_state/algorithm/metric_algorithm",
+    ],
+)
+
+py_library(
+    name = "apollo",
+    srcs = ["__init__.py"],
+    visibility = ["//visibility:public"],
+    deps = [":apollo_simulator_lib"],
+)

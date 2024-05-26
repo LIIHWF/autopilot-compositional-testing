@@ -1,0 +1,39 @@
+load("@com_google_protobuf//:protobuf.bzl", "py_proto_library")
+
+py_proto_library(
+    name = "hd_map_py_pb2",
+    srcs = ["proto/hd_map.proto"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//src/semantic_model/geometry:geometry_py_pb2",
+        "//src/semantic_model/map/common:map_common_py_pb2",
+    ],
+)
+
+py_library(
+    name = "component",
+    srcs = glob(["component/*.py"]),
+    deps = [
+        ":hd_map_py_pb2",
+        "//src/common/types",
+        "//src/semantic_model/geometry",
+    ],
+)
+
+py_library(
+    name = "hd_map_lib",
+    srcs = ["hd_map.py"],
+    deps = [
+        ":component",
+        ":hd_map_py_pb2",
+        "//src/common/types",
+        "//src/semantic_model/geometry",
+    ],
+)
+
+py_library(
+    name = "hd_map",
+    srcs = ["__init__.py"],
+    visibility = ["//visibility:public"],
+    deps = [":hd_map_lib"],
+)

@@ -1,0 +1,24 @@
+py_binary(
+    name = "run_single",
+    srcs = ["run_single.py"],
+)
+
+py_binary(
+    name = "run_batch",
+    srcs = [
+        "common.py",
+        "dashboard.py",
+        "run_batch.py",
+    ],
+    main = "run_batch.py",
+)
+
+py_binary(
+    name = "show",
+    srcs = [
+        "dashboard.py",
+        "show.py",
+        "common.py"
+    ],
+    main = "show.py",
+)

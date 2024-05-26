@@ -1,0 +1,5 @@
+__pycache__
+dashboard_log.txt
+dashboard_status.txt
+bazel-*
+test_result

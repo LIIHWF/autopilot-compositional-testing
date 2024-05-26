@@ -1,0 +1,1 @@
+patch/autoware/autoware_map/main-map/$1.sh

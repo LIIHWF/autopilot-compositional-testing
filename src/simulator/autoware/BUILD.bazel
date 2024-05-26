@@ -1,0 +1,22 @@
+py_library(
+    name = "autoware_simulator_lib",
+    srcs = [
+        "autoware_vehicle_state.py",
+        "autoware_world_model.py",
+        "message.py",
+        "server.py",
+        "autoware_simulator.py",
+    ],
+    deps = [
+        "//src/common/types",
+        "//src/simulator/carla",
+        "//src/simulator/context"
+    ],
+)
+
+py_library(
+    name = "autoware",
+    srcs = ["__init__.py"],
+    visibility = ["//visibility:public"],
+    deps = [":autoware_simulator_lib"],
+)

@@ -1,0 +1,306 @@
+header {
+  version: "1.500000"
+  date: "2018-03-23T13:27:54"
+  projection {
+    proj: "+proj=utm +zone=10 +ellps=WGS84 +datum=WGS84 +units=m +no_defs"
+  }
+  district: "0"
+  rev_major: "1"
+  rev_minor: "0"
+  left: -127.48876721916434
+  top: 1.1071479475609244e-06
+  right: -127.48876721916434
+  bottom: 1.1071479475609244e-06
+  vendor: "ADSV"
+}
+lane {
+  id {
+    id: "lane_0"
+  }
+  central_curve {
+    segment {
+      line_segment {
+        point {
+          x: 0.0
+          y: 1.75
+        }
+        point {
+          x: 1000.0
+          y: 1.75
+        }
+      }
+      s: 0.0
+      start_position {
+        x: 0.0
+        y: 1.75
+      }
+      length: 1000.0
+    }
+  }
+  left_boundary {
+    curve {
+      segment {
+        line_segment {
+          point {
+            x: 0.0
+            y: 3.5
+          }
+          point {
+            x: 1000.0
+            y: 3.5
+          }
+        }
+        s: 0.0
+        start_position {
+          x: 0.0
+          y: 3.5
+        }
+        length: 1000.0
+      }
+    }
+    length: 1000.0
+    boundary_type {
+      s: 0.0
+      types: CURB
+    }
+  }
+  right_boundary {
+    curve {
+      segment {
+        line_segment {
+          point {
+            x: 0.0
+            y: 0.0
+          }
+          point {
+            x: 1000.0
+            y: 0.0
+          }
+        }
+        s: 0.0
+        start_position {
+          x: 0.0
+          y: 0.0
+        }
+        length: 1000.0
+      }
+    }
+    length: 1000.0
+    boundary_type {
+      types: DOTTED_WHITE
+    }
+  }
+  length: 1000.0
+  speed_limit: 22.22222222222222
+  right_neighbor_forward_lane_id {
+    id: "lane_1"
+  }
+  type: CITY_DRIVING
+  turn: NO_TURN
+  left_sample {
+    s: 0.0
+    width: 1.75
+  }
+  left_sample {
+    s: 1000.0
+    width: 1.75
+  }
+  right_sample {
+    s: 0.0
+    width: 1.75
+  }
+  right_sample {
+    s: 1000.0
+    width: 1.75
+  }
+  direction: FORWARD
+  left_road_sample {
+    s: 0.0
+    width: 1.75
+  }
+  left_road_sample {
+    s: 1000.0
+    width: 1.75
+  }
+  right_road_sample {
+    s: 0.0
+    width: 1.75
+  }
+  right_road_sample {
+    s: 1000.0
+    width: 1.75
+  }
+}
+lane {
+  id {
+    id: "lane_1"
+  }
+  central_curve {
+    segment {
+      line_segment {
+        point {
+          x: 0.0
+          y: -1.75
+        }
+        point {
+          x: 1000.0
+          y: -1.75
+        }
+      }
+      s: 0.0
+      start_position {
+        x: -1.75
+        y: 0.0
+      }
+      length: 1000.0
+    }
+  }
+  left_boundary {
+    curve {
+      segment {
+        line_segment {
+          point {
+            x: 0.0
+            y: 0.0
+          }
+          point {
+            x: 1000.0
+            y: 0.0
+          }
+        }
+        s: 0.0
+        start_position {
+          x: 0.0
+          y: 0.0
+        }
+        length: 1000.0
+      }
+    }
+    length: 1000.0
+    boundary_type {
+      s: 0.0
+      types: DOTTED_WHITE
+    }
+  }
+  right_boundary {
+    curve {
+      segment {
+        line_segment {
+          point {
+            x: 0.0
+            y: -3.5
+          }
+          point {
+            x: 1000.0
+            y: -3.5
+          }
+        }
+        s: 0.0
+        start_position {
+          x: 1000.0
+          y: -3.5
+        }
+        length: 1000.0
+      }
+    }
+    length: 1000.0
+    boundary_type {
+      types: CURB
+    }
+  }
+  length: 1000.0
+  speed_limit: 22.22222222222222
+  left_neighbor_forward_lane_id {
+    id: "lane_0"
+  }
+  type: CITY_DRIVING
+  turn: NO_TURN
+  left_sample {
+    s: 0.0
+    width: 1.75
+  }
+  left_sample {
+    s: 1000.0
+    width: 1.75
+  }
+  right_sample {
+    s: 0.0
+    width: 1.75
+  }
+  right_sample {
+    s: 1000.0
+    width: 1.75
+  }
+  direction: FORWARD
+  left_road_sample {
+    s: 0.0
+    width: 1.75
+  }
+  left_road_sample {
+    s: 1000.0
+    width: 1.75
+  }
+  right_road_sample {
+    s: 0.0
+    width: 1.75
+  }
+  right_road_sample {
+    s: 1000.0
+    width: 1.75
+  }
+}
+road {
+  id {
+    id: "road_0"
+  }
+  section {
+    id {
+      id: "1"
+    }
+    lane_id {
+      id: "lane_0"
+    }
+    lane_id {
+      id: "lane_1"
+    }
+    boundary {
+      outer_polygon {
+        edge {
+          curve {
+            segment {
+              line_segment {
+                point {
+                  x: 0.0
+                  y: 3.5
+                }
+                point {
+                  x: 1000.0
+                  y: 3.5
+                }
+              }
+            }
+          }
+          type: LEFT_BOUNDARY
+        }
+        edge {
+          curve {
+            segment {
+              line_segment {
+                point {
+                  x: 0.0
+                  y: -3.5
+                }
+                point {
+                  x: 1000.0
+                  y: -3.5
+                }
+              }
+            }
+          }
+          type: RIGHT_BOUNDARY
+        }
+      }
+    }
+  }
+}
+

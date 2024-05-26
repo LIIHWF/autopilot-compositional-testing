@@ -1,0 +1,1 @@
+docker pull llccc/autoware-v1-determinism:latest

@@ -1,0 +1,9 @@
+{
+  "bridge_server": {
+    "host": "auto",
+    "port": 12346
+  },
+  "vehicle": {
+    "uid": "v3"
+  }
+}

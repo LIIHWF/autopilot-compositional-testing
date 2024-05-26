@@ -1,0 +1,34 @@
+py_binary(
+    name = "merging",
+    srcs = ["merging.py"],
+    data = [
+        "//map_data"
+    ]
+)
+
+
+py_binary(
+    name = "lane_change",
+    srcs = ["lane_change.py"],
+    data = [
+        "//map_data"
+    ]
+)
+
+
+py_binary(
+    name = "crossing_with_yield_signs",
+    srcs = ["crossing_with_yield_signs.py"],
+    data = [
+        "//map_data"
+    ]
+)
+
+py_binary(
+    name = "crossing_with_traffic_lights",
+    srcs = ["crossing_with_traffic_lights.py"],
+    data = [
+        "//map_data"
+    ]
+)
+

@@ -1,0 +1,8 @@
+export PYTHONPATH=$PYTHONPATH:/apollo/cyber
+export PYTHONPATH=$PATHONPATH:/apollo/bridge
+export PYTHONPATH=$PATHONPATH:/apollo/bridge/bridge_client
+export PYTHONPATH=$PATHONPATH:/apollo/bridge/py_proto
+export PYTHONPATH=$PYTHONPATH:/apollo/bazel-bin/cyber/python/internal
+export PYTHONPATH=$PYTHONPATH:/apollo/cyber/python
+export PYTHONPATH=$PYTHONPATH:/apollo/bazel-bin
+

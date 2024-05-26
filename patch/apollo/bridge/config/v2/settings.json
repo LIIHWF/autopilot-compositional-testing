@@ -1,0 +1,13 @@
+{
+  "bridge_server": {
+    "host": "auto",
+    "port": 12345
+  },
+  "dreamview": {
+    "host": "localhost",
+    "port": 8888
+  },
+  "vehicle": {
+    "uid": "apollo-2"
+  }
+}

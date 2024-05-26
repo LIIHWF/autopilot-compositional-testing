@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package semantic_model.map;
+
+enum RJType {
+  RJ_TYPE_ROAD = 0;
+  RJ_TYPE_JUNCTION = 1;
+}
+
+enum TurnType {
+  TURN_TYPE_NO_TURN = 0;
+  TURN_TYPE_LEFT_TURN = 1;
+  TURN_TYPE_RIGHT_TURN = 2;
+  TURN_TYPE_U_TURN = 3;
+}
+
+enum StaticObjectType {
+  STATIC_OBJECT_TYPE_STOP_SIGN = 0;
+  STATIC_OBJECT_TYPE_TRAFFIC_LIGHT = 1;
+  STATIC_OBJECT_TYPE_YIELD_SIGN = 2;
+}

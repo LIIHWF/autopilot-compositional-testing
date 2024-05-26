@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+import "src/semantic_model/geometry/proto/geometry.proto";
+import "src/semantic_model/map/common/proto/common.proto";
+
+package semantic_model.map;
+
+enum LaneBoundaryType {
+  LANE_BOUNDARY_TYPE_DOTTED_WHITE = 0;
+  LANE_BOUNDARY_TYPE_DOTTED_YELLOW = 1;
+  LANE_BOUNDARY_TYPE_DOUBLE_YELLOW = 2;
+  LANE_BOUNDARY_TYPE_SOLID_WHITE = 3;
+  LANE_BOUNDARY_TYPE_SOLID_YELLOW = 4;
+  LANE_BOUNDARY_TYPE_CURB = 5;
+  LANE_BOUNDARY_TYPE_VIRTUAL = 6;
+}
+
+message Lane {
+  string id = 1;
+  repeated string predecessor_ids = 2;
+  repeated string successor_ids = 3;
+  optional string left_forward_neighbor_id = 4;
+  optional string right_forward_neighbor_id = 5;
+  optional string left_reverse_neighbor_id = 6;
+  optional string right_reverse_neighbor_id = 7;
+  LaneBoundaryType left_boundary_type = 8;
+  LaneBoundaryType right_boundary_type = 9;
+  semantic_model.map.RJType rj_type = 10;
+  semantic_model.map.TurnType turn_type = 11;
+  double speed_limit = 12;
+  semantic_model.geometry.RegionPolyline region_polyline = 13;
+}
+
+
+message Section {
+  string id = 1;
+  optional string left_section_id = 2;
+  optional string right_section_id = 3;
+  semantic_model.geometry.Polyline reference_line = 4;
+  repeated Lane ordered_lanes = 5;
+}
+
+
+message HdControlPosition {
+  string lane_id = 1;
+  double offset = 2;
+}
+
+
+message HdStaticObject {
+  string id = 1;
+  StaticObjectType type = 2;
+  repeated HdControlPosition control_positions = 3;
+}
+
+
+message HdMap {
+  repeated Section sections = 1;
+  repeated HdStaticObject static_objects = 2;
+}

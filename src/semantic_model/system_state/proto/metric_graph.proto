@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+import "src/semantic_model/map/common/proto/common.proto";
+import "src/semantic_model/geometry/proto/geometry.proto";
+
+package semantic_model;
+
+message Node {
+  string id = 1;
+  optional semantic_model.geometry.Vertex position = 2;
+}
+
+message Edge {
+  string id = 1;
+  string source_id = 2;
+  string target_id = 3;
+  semantic_model.map.RJType rj_type = 4;
+  semantic_model.map.TurnType turn_type = 5;
+  double speed_limit = 6;
+  semantic_model.geometry.Polyline reference_line = 7;
+}
+
+message Road {
+  string id = 1;
+  repeated string edge_id_sequence = 2;
+  string entrance_id = 3;
+  string exit_id = 4;
+}
+
+message Junction {
+  string id = 1;
+  repeated string edge_ids = 2;
+  repeated string entrance_node_ids = 3;
+  repeated string exit_node_ids = 4;
+}
+
+message BinaryRelation {
+  string object1_id = 1;
+  string object2_id = 2;
+}
+
+message MetricGraph {
+  repeated Node nodes = 1;
+  repeated Edge edges = 2;
+  repeated Road roads = 3;
+  repeated Junction junctions = 4;
+  repeated BinaryRelation junction_entex_vertex_relation = 5;
+  repeated BinaryRelation is_right_adjacent_edge_relation= 6;
+}

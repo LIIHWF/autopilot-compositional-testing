@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+import "src/semantic_model/map/common/proto/common.proto";
+
+package semantic_model;
+
+message StaticObjectState {
+    repeated string control_node_ids = 1;
+}
+
+message StaticObject {
+  string id = 1;
+  semantic_model.map.StaticObjectType type = 2;
+  StaticObjectState state = 3;
+}

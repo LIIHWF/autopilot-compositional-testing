@@ -1,0 +1,24 @@
+py_library(
+    name = "carla_manager_lib",
+    srcs = ["carla_manager.py"],
+    deps = ["//src/common/types"],
+)
+
+py_library(
+    name = "carla_runner_lib",
+    srcs = ["carla_runner.py"],
+    deps = [
+        ":carla_manager_lib",
+        "//src/common/types",
+    ],
+)
+
+py_library(
+    name = "carla",
+    srcs = ["__init__.py"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":carla_manager_lib",
+        ":carla_runner_lib",
+    ],
+)

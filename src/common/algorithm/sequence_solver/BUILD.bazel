@@ -1,0 +1,12 @@
+py_library(
+    name = "sequence_solver",
+    srcs = ["__init__.py"],
+    visibility = ["//visibility:public"],
+    deps = [":sequence_solver_lib"],
+)
+
+py_library(
+    name = "sequence_solver_lib",
+    srcs = ["sequence_solver.py"],
+    deps = ["//src/common/types"],
+)

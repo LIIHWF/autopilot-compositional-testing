@@ -1,0 +1,6 @@
+loguru==0.7.0
+transforms3d==0.3.1
+websocket-client==1.3.1
+singledispatchmethod==1.0
+multimethod==1.5
+netifaces==0.11.0

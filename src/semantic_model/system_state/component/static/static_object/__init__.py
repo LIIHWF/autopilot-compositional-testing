@@ -1,0 +1,1 @@
+from .static_object import StaticObject, StaticObjectState

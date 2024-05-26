@@ -1,0 +1,14 @@
+py_library(
+    name = "argument_lib",
+    srcs = ["argument.py"],
+    deps = [
+        "//src/common/types"
+    ]
+)
+
+py_library(
+    name = "argument",
+    srcs = ["__init__.py"],
+    deps = [":argument_lib"],
+    visibility = ["//visibility:public"],
+)

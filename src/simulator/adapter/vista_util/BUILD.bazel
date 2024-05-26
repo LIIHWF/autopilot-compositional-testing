@@ -1,0 +1,28 @@
+py_library(
+    name = "libs",
+    srcs = [
+        "apollo_hd_map_transformer.py",
+    ],
+    deps = [
+        "//src/common/libs/apollo/map/parser",
+        "//src/common/types",
+        "//src/semantic_model/geometry",
+        "//src/semantic_model/map/common",
+        "//src/semantic_model/map/hd_map",
+        "//src/semantic_model/map/hd_map:hd_map_py_pb2",
+        "//src/semantic_model/system_run",
+        "//src/semantic_model/system_state",
+    ]
+)
+
+
+py_library(
+    name = "vista_util",
+    srcs = [
+        "__init__.py",
+    ],
+    deps = [
+        ":libs",
+    ],
+    visibility = ["//visibility:public"],
+)

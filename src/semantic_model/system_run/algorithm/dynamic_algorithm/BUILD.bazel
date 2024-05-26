@@ -1,0 +1,18 @@
+py_library(
+    name = "dynamic_algorithm_lib",
+    srcs = [
+        "dynamic_algorithm.py",
+    ],
+    deps = [
+        "//src/common/types",
+        "//src/semantic_model/system_run",
+        "//src/semantic_model/system_state",
+    ],
+)
+
+py_library(
+    name = "dynamic_algorithm",
+    srcs = ["__init__.py"],
+    visibility = ["//visibility:public"],
+    deps = [":dynamic_algorithm_lib"],
+)

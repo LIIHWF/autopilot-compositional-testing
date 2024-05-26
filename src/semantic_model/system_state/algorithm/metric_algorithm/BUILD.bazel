@@ -1,0 +1,19 @@
+py_library(
+    name = "metric_algorithm_lib",
+    srcs = [
+        "metric_algorithm.py",
+    ],
+    deps = [
+        "//src/common/types",
+        "//src/semantic_model/geometry",
+        "//src/semantic_model/system_run",
+        "//src/semantic_model/system_state",
+    ],
+)
+
+py_library(
+    name = "metric_algorithm",
+    srcs = ["__init__.py"],
+    visibility = ["//visibility:public"],
+    deps = [":metric_algorithm_lib"],
+)

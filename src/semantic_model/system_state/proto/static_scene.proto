@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+import "src/semantic_model/system_state/proto/static_object.proto";
+import "src/semantic_model/system_state/proto/metric_graph.proto";
+
+package semantic_model;
+
+message StaticScene {
+  MetricGraph metric_graph = 1;
+
+  repeated StaticObject static_objects = 2;
+}

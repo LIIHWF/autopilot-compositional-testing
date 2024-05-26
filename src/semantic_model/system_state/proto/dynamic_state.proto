@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+import "src/semantic_model/geometry/proto/geometry.proto";
+
+package semantic_model;
+
+message VehicleShape {
+    double length = 1;
+    double width = 2;
+}
+
+message VehicleItineraryBase {
+  double start_offset = 1;
+  repeated string edge_id_sequence = 2;
+  double end_offset = 3;
+}
+
+message VehicleDynamicState {
+  uint32 itinerary_index = 1;
+  double edge_offset = 2;
+  double speed = 3;
+  double acceleration = 4;
+  double waiting_time = 5;
+  string edge_id = 6;
+  geometry.Vertex position_2d = 7;
+}
+
+enum TrafficLightColor {
+    TRAFFIC_LIGHT_COLOR_UNKNOWN = 0;
+    TRAFFIC_LIGHT_COLOR_GREEN = 1;
+    TRAFFIC_LIGHT_COLOR_YELLOW = 2;
+    TRAFFIC_LIGHT_COLOR_RED = 3;
+}
+
+message TrafficLightDynamicState {
+  TrafficLightColor color = 1;
+}
+
