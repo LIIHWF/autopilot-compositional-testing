@@ -8,7 +8,7 @@ This codebase requires a Linux computer with GPU capacity needed by the Simulato
 
 To simulate each autopilot, please clone this repository first. Our codebase has the following software dependencies:
 - Bazel (installation instructions [here](https://bazel.build/install))
-- Python >= 3.8 (run `setup_python.sh` in our codebase to install the required Python packages)
+- Python >= 3.8 (run `bash setup_python.sh` in our codebase to install the required Python packages)
 
 Then, install and launch the required components following the instructions below.
 
@@ -24,7 +24,7 @@ Then, install and launch the required components following the instructions belo
 1. Download `CARLA_0.9.15.tar.gz` from [here](https://carla-releases.s3.us-east-005.backblazeb2.com/Linux/CARLA_0.9.15.tar.gz) and extract it.
 
 #### Launch
-1. From the extracted directory, run `CarlaUE4.sh`.
+1. From the extracted directory, run `bash CarlaUE4.sh`.
 
 
 ### Apollo 8.0
@@ -34,19 +34,19 @@ Then, install and launch the required components following the instructions belo
 1. Install Docker following the instructions [here](https://docs.docker.com/desktop/install/linux-install/) and configure it following the instructions [here](https://docs.docker.com/engine/install/linux-postinstall/).
 2. Download Apollo codebase `v8.0.0.tar.gz` from [here](https://github.com/ApolloAuto/apollo/archive/refs/tags/v8.0.0.tar.gz) and extract it into two different locations for the two moving vehicles.
 3. Copy the script for the Bridge located at `patch/apollo/bridge/` in our codebase to the root of the two Apollo codebases.
-4. Replace `docker/script/dev_start.sh` and `docker/script/dev_into.sh` in each Apollo codebase with the files with the same name at `patch/apollo/docker_script/` in our codebase to enable multiple autopilots on a single computer.
+4. Replace `docker/scripts/dev_start.sh` and `docker/scripts/dev_into.sh` in each Apollo codebase with the files with the same name at `patch/apollo/docker_script/` in our codebase to enable multiple autopilots on a single computer.
 5. To build the first autopilot:
-    1. In one of the Apollo codebases, run `bash docker/script/dev_start.sh v1`. Enter the created Docker container for this autopilot by running `bash docker/script/dev_into.sh v1`.
+    1. In one of the Apollo codebases, run `bash docker/scripts/dev_start.sh v1`. Enter the created Docker container for this autopilot by running `bash docker/scripts/dev_into.sh v1`.
     3. Inside the Docker container, run `python /apollo/bridge/patch.py`.
     3. Build the autopilot with `/apollo/apollo.sh build opt_gpu`.
 6. To build the second autopilot:
-    1. In the second Apollo codebase, run `bash docker/script/dev_start.sh v2` to create another Docker container. Enter the created Docker container by running `bash docker/script/dev_into.sh v2`.
+    1. In the second Apollo codebase, run `bash docker/scripts/dev_start.sh v2` to create another Docker container. Enter the created Docker container by running `bash docker/scripts/dev_into.sh v2`.
     2. Repeat the steps 5.2, 5.3, as for building the first autopilot.
 
 #### Launch
 
-1. (Only necessary if the Docker container has been exited.) Navigate our codebase, run respectively `bash script/enter_apollo_docker.sh v1` and `bash script/enter_apollo_docker.sh v2` in two terminals to enter the corresponding Docker containers for the autopilots.
-2. Run `bash /apollo/bridge/script/client.sh` in each container to enable the connection to the Bridge.
+1. (Only necessary if the Docker container has been exited.) Navigate to the two Apollo codebases, run respectively `bash docker/scripts/dev_into.sh v1` and `bash docker/scripts/dev_into.sh v2` in two terminals to enter the corresponding Docker containers for the autopilots.
+2. Run `bash /apollo/bridge/scripts/client.sh` in each container to enable the connection to the Bridge.
 
 ### Autoware.Universe v1.0
 
@@ -69,7 +69,7 @@ Then, install and launch the required components following the instructions belo
 
 #### Launch
 
-1. Navigate the extracted directory and run `run-OSSDC-SIM-v1.sh`.
+1. Navigate to the extracted directory and run `bash run-OSSDC-SIM-v1.sh`.
 
 ## Usage
 

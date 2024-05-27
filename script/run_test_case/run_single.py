@@ -1,6 +1,7 @@
 import argparse
 import subprocess
 import json
+import loguru
 
 
 parser = argparse.ArgumentParser('Run a single test case')
@@ -110,7 +111,7 @@ try:
         stdout=subprocess.PIPE, stderr=(None if args.log else subprocess.PIPE), text=True, input=result.stdout)
     result = json.loads(result.stdout)
 except json.JSONDecodeError:
-    print(f'Error occur during the simulation. Please manually run `{command}` for more information.')
+    loguru.logger.error('Error occur during the simulation. Please retry or add --log option for more information.')
     exit()
 
 if not args.json:
