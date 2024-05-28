@@ -45,7 +45,7 @@ Then, install and launch the required components following the instructions belo
 
 #### Launch
 
-1. (Only necessary if the Docker container has been exited.) Navigate to the two Apollo codebases, run respectively `bash docker/scripts/dev_into.sh v1` and `bash docker/scripts/dev_into.sh v2` in two terminals to enter the corresponding Docker containers for the autopilots.
+1. (Only necessary if the Docker container has been exited.) Navigate to the two Apollo codebases, run respectively `bash docker/scripts/dev_into.sh v1` and `bash docker/scripts/dev_into.sh v2` to enter the corresponding Docker containers for the autopilots.
 2. Run `bash /apollo/bridge/scripts/client.sh` in each container to enable the connection to the Bridge.
 
 ### Autoware.Universe v1.0
