@@ -1,5 +1,20 @@
 # Compositional Testing for Autopilots
 
+This is the codebase for the work: [https://arxiv.org/abs/2405.16914](https://arxiv.org/abs/2405.16914)
+
+Rigorous Simulation-based Testing for Autonomous Driving Systems -- Targeting the Achilles' Heel of Four Open Autopilots
+Changwen Li, Joseph Sifakis, Rongjie Yan, Jian Zhang
+
+```
+@article{li2024rigorous,
+  title={Rigorous Simulation-based Testing for Autonomous Driving Systems--Targeting the Achilles' Heel of Four Open Autopilots},
+  author={Li, Changwen and Sifakis, Joseph and Yan, Rongjie and Zhang, Jian},
+  journal={arXiv preprint arXiv:2405.16914},
+  year={2024}
+}
+```
+
+
 ## Requirements
 
 This codebase requires a Linux computer with GPU capacity needed by the Simulators. Ubuntu 22.04 operating system and an NVIDIA GPU are recommended.
