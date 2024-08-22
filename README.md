@@ -53,8 +53,8 @@ Then, install and launch the required components following the instructions belo
 4. Replace `docker/scripts/dev_start.sh` and `docker/scripts/dev_into.sh` in each Apollo codebase with the files with the same name at `patch/apollo/docker_script/` in our codebase to enable multiple autopilots on a single computer.
 5. To build the first autopilot:
     1. In one of the Apollo codebases, run `bash docker/scripts/dev_start.sh v1`. Enter the created Docker container for this autopilot by running `bash docker/scripts/dev_into.sh v1`.
-    3. Inside the Docker container, run `python /apollo/bridge/patch.py`.
-    3. Build the autopilot with `/apollo/apollo.sh build opt_gpu`.
+    3. Inside the Docker container, run `pip install loguru` and `python /apollo/bridge/patch.py`.
+    3. Build the autopilot with `/apollo/apollo.sh build_opt_gpu`.
 6. To build the second autopilot:
     1. In the second Apollo codebase, run `bash docker/scripts/dev_start.sh v2` to create another Docker container. Enter the created Docker container by running `bash docker/scripts/dev_into.sh v2`.
     2. Repeat the steps 5.2, 5.3, as for building the first autopilot.
