@@ -7,3 +7,6 @@ carla==0.9.15
 transforms3d==0.3.1
 numpy==1.20.0
 sympy==1.12
+pandas==2.0.3
+shapely==2.0.6
+networkx==3.1

@@ -1,6 +1,7 @@
 from src.common.types import *
 from src.semantic_model.geometry import *
 import numpy as np
+np.float = np.float64
 from transforms3d.euler import euler2quat
 import math
 

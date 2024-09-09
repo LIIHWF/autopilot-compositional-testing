@@ -3,3 +3,7 @@ dashboard_log.txt
 dashboard_status.txt
 bazel-*
 test_result
+MODULE.bazel
+MODULE.bazel.lock
+/carla
+statistics.ipynb

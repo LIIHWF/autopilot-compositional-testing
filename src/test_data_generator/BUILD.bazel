@@ -1,0 +1,14 @@
+py_binary(
+    name = "apollo_fast_search",
+    srcs = ["apollo_fast_search.py"],
+)
+
+py_binary(
+    name = "behavior_fast_search",
+    srcs = ["behavior_fast_search.py"],
+)
+
+py_binary(
+    name = "generator",
+    srcs = ["generator.py"],
+)

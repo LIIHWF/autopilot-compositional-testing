@@ -22,6 +22,7 @@ CACHE_ROOT_DIR="${APOLLO_ROOT_DIR}/.cache"
 
 DOCKER_REPO="apolloauto/apollo"
 DEV_CONTAINER="apollo_dev_${USER}_$1"
+CLIENT_ID=$1
 DEV_INSIDE="in-dev-docker"
 
 SUPPORTED_ARCHS=(x86_64 aarch64)
@@ -377,7 +378,7 @@ function main() {
         ${local_volumes} \
         -w /apollo \
         -v "$PWD/bridge:/apollo/bridge" \
-        -v "$PWD/bridge/config/$1:/apollo/bridge_config" \
+        -v "$PWD/bridge/config/$CLIENT_ID:/apollo/bridge_config" \
         --add-host "${DEV_INSIDE}:127.0.0.1" \
         --add-host "${local_host}:127.0.0.1" \
         --hostname "${DEV_INSIDE}" \

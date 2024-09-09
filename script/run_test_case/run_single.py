@@ -2,12 +2,13 @@ import argparse
 import subprocess
 import json
 import loguru
+import time
 
 
 parser = argparse.ArgumentParser('Run a single test case')
 
 # vista_type is taken from { merging , lane_change , crossing_with_yield_signs , crossing_with_traffic_lights }
-parser.add_argument('autopilot', type=str, help='autopilot to test', choices=['apollo', 'autoware', 'carla', 'lgsvl'])
+parser.add_argument('autopilot', type=str, help='autopilot to test', choices=['apollo', 'autoware', 'carla', 'lgsvl', 'apollo-40', 'behavior'])
 parser.add_argument('vista_type', type=str, help='type of vista', choices=['merging', 'lane_change', 'crossing_with_yield_signs', 'crossing_with_traffic_lights'])
 parser.add_argument('-ve', required=True, type=float, help='speed of the ego vehicle')
 parser.add_argument('-xf', required=True, type=float, help='distance from the critical zone to the front vehicle')
@@ -63,6 +64,12 @@ PROPERTY_STR = {
 
 
 FINELY_TUNED_XE = {
+    'apollo-40': {
+        'merging': {0.0: 0.0, 2.0: 1.6, 5.0: 6.085806194501845, 10.0: 17.213259316477412, 15.0: 33.1875},
+        'lane_change': {5.0: 6.085806194501845, 10.0: 17.213259316477412, 15.0: 31.6875, 20: 50.02083333333333},
+        'crossing_with_yield_signs': {0.0: 0, 5.0: 6.085806194501845, 10.0: 17.213259316477412, 15.0: 31.6875},
+        'crossing_with_traffic_lights': {0.0: 0, 5.0: 6.085806194501845, 10.0: 17.213259316477412, 15.0: 33.1875, 20.0: 50.02083333333333}
+    },
     'apollo': {
         'merging': {0.0: 0.0, 5.0: 6.085806194501845, 10.0: 17.213259316477412, 15.0: 33.1875},
         'lane_change': {5.0: 6.085806194501845, 10.0: 17.213259316477412, 15.0: 31.6875, 20: 50.02083333333333},
@@ -78,6 +85,12 @@ FINELY_TUNED_XE = {
     'carla': {
         'merging': {0.0: 0, 5.0: 0.8, 10.0: 6.8, 15.0: 15.8},
         'lane_change': {5.0: 7.0, 10.0: 10.0, 15.0: 15.8, 20.0: 27},
+        'crossing_with_yield_signs': {0.0: 0.0, 5.0: 0.8, 10.0: 6.8, 15.0: 15.8},
+        'crossing_with_traffic_lights': {0.0: 0.0, 5.0: 1.8, 10.0: 6.8, 15.0: 15.8, 20.0: 26.0}
+    },
+    'behavior': {
+        'merging': {0.0: 0, 5.0: 0.8, 10.0: 6.8, 15.0: 15.8},
+        'lane_change': {4.0: 7.0, 5.0: 7.0, 8.0: 10.0, 10.0: 10.0, 15.0: 15.8, 20.0: 27},
         'crossing_with_yield_signs': {0.0: 0.0, 5.0: 0.8, 10.0: 6.8, 15.0: 15.8},
         'crossing_with_traffic_lights': {0.0: 0.0, 5.0: 1.8, 10.0: 6.8, 15.0: 15.8, 20.0: 26.0}
     },
@@ -100,18 +113,25 @@ else:
 
 # command += f' | bazel-bin/src/oracle/{args.autopilot}/{args.vista_type}'
 
-oracle_command = f'bazel-bin/src/oracle/{args.autopilot}/{args.vista_type}'
+oracle_command = f'bazel-bin/src/oracle/{args.autopilot.split("-")[0]}/{args.vista_type}'
 
 # result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=(None if args.log else subprocess.PIPE), text=True)
+
+simulation_start = time.time()
 result = subprocess.run(command.split(), shell=False, stdout=subprocess.PIPE, stderr=(None if args.log else subprocess.PIPE), text=True)
+simulation_end = time.time()
+
 try:
+    loguru.logger.info('Start running the simulation')
     # result = json.loads(result.stdout)
+    checking_start = time.time()
     result = subprocess.run(
         oracle_command.split(), shell=False, 
         stdout=subprocess.PIPE, stderr=(None if args.log else subprocess.PIPE), text=True, input=result.stdout)
     result = json.loads(result.stdout)
+    checking_end = time.time()
 except json.JSONDecodeError:
-    loguru.logger.error('Error occur during the simulation. Please retry or add --log option for more information.')
+    loguru.logger.error(f'Error occur during the simulation. Please retry or add --log option for more information. Cmd: {f"{command} | {oracle_command}"}')
     exit()
 
 if not args.json:
@@ -128,6 +148,8 @@ if not args.json:
         for p in ['p1', 'p2', 'p3', 'p4']:
             if p in verdict:
                 print(f'    {p}:', PROPERTY_STR[p])
+    print('Simulation time:', simulation_end - simulation_start)
+    print('Checking time:', checking_end - checking_start)
     print()
 else:
     print(json.dumps({
@@ -135,4 +157,6 @@ else:
         'xf': args.xf,
         'xa': args.xa,
         'verdict': simple_verdict(result),
+        'simulation_time': simulation_end - simulation_start,
+        'checking_time': checking_end - checking_start
     }))

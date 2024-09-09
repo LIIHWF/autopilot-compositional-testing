@@ -23,8 +23,6 @@ def _add_if_not_exists_in_file(file_path, _new, _old_pattern=None):
 def create_tmp_map():
     loguru.logger.info('Creating tmp map')
     os.system('cp -r /apollo/modules/map/data/borregas_ave/ /apollo/modules/map/data/tmp/')
-    
-    
 
 def set_mode_mock():
     loguru.logger.info('Setting clock_mode to MODE_MOCK')
@@ -78,4 +76,4 @@ if __name__ == '__main__':
     disable_prediction_multi_thread()
     disable_reference_line_provider_thread()
     disable_open_space_planner_thread()
-
+    create_tmp_map()
