@@ -1,4 +1,4 @@
-# Compositional Testing for Autopilots
+# CCTest: Critical Configuration Testing for Autonomous Driving Systems
 
 This is the codebase for the work: [https://arxiv.org/abs/2405.16914](https://arxiv.org/abs/2405.16914)
 
