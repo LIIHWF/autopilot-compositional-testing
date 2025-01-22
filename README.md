@@ -1,4 +1,4 @@
-# Compositional Testing for Autopilots
+# CCTest: Critical Configuration Testing for Autonomous Driving Systems
 
 This is the codebase for the work: [https://arxiv.org/abs/2405.16914](https://arxiv.org/abs/2405.16914)
 
@@ -24,7 +24,7 @@ This codebase requires a Linux computer with GPU capacity needed by the Simulato
 
 To simulate each autopilot, please clone this repository first. Our codebase has the following software dependencies:
 - Bazel (installation instructions [here](https://bazel.build/install))
-- Python >= 3.8 (run `bash setup_python.sh` in our codebase to install the required Python packages)
+- Python = 3.8 (run `bash setup_python.sh` in our codebase to install the required Python packages)
 
 Then, install and launch the required components following the instructions below.
 
