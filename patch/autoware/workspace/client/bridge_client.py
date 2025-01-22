@@ -17,6 +17,14 @@ import os
 import signal
 from typing import Optional
 
+logger.remove()
+
+# 添加自定义的控制台日志处理器，不包含时间
+logger.add(
+    sink=lambda msg: print(msg, end=''),  # 输出到控制台
+    format="{message}",  # 不包含时间字段
+)
+
 
 home = os.path.expanduser("~")
 

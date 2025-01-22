@@ -15,6 +15,7 @@ parser.add_argument('-xf', required=True, type=float, help='distance from the cr
 parser.add_argument('-xa', required=False, type=float, help='distance from the arriving vehicle to the critical zone')
 parser.add_argument('--log', action='store_true', help='enable logging', default=False)
 parser.add_argument('--json', action='store_true', help='output in json format', default=False)
+parser.add_argument('--scenario-save-path', type=str, help='path to save the scenario', default=None)
 
 args = parser.parse_args()
 
@@ -62,52 +63,18 @@ PROPERTY_STR = {
     'p4': 'The ego vehicle must not be in the critical zone when a side light is green.'
 }
 
+def finely_tuned_xe_wrapper(autopilot, vista, ve):
+    output = subprocess.check_output(['bazel-bin/src/test_data_generator/finely_tuned_xe', autopilot, vista, str(ve)])
+    return json.loads(output)
 
-FINELY_TUNED_XE = {
-    'apollo-40': {
-        'merging': {0.0: 0.0, 2.0: 1.6, 5.0: 6.085806194501845, 10.0: 17.213259316477412, 15.0: 33.1875},
-        'lane_change': {5.0: 6.085806194501845, 10.0: 17.213259316477412, 15.0: 31.6875, 20: 50.02083333333333},
-        'crossing_with_yield_signs': {0.0: 0, 5.0: 6.085806194501845, 10.0: 17.213259316477412, 15.0: 31.6875},
-        'crossing_with_traffic_lights': {0.0: 0, 5.0: 6.085806194501845, 10.0: 17.213259316477412, 15.0: 33.1875, 20.0: 50.02083333333333}
-    },
-    'apollo': {
-        'merging': {0.0: 0.0, 5.0: 6.085806194501845, 10.0: 17.213259316477412, 15.0: 33.1875},
-        'lane_change': {5.0: 6.085806194501845, 10.0: 17.213259316477412, 15.0: 31.6875, 20: 50.02083333333333},
-        'crossing_with_yield_signs': {0.0: 0, 5.0: 6.085806194501845, 10.0: 17.213259316477412, 15.0: 31.6875},
-        'crossing_with_traffic_lights': {0.0: 0, 5.0: 6.085806194501845, 10.0: 17.213259316477412, 15.0: 33.1875, 20.0: 50.02083333333333}
-    },
-    'autoware': {
-        'merging': {0.0: 0, 5.0: 6.2, 10.0: 15.9, 15.0: 33.3},
-        'lane_change': {5.0: 6.2, 10.0: 17.3, 15.0: 33.3, 20.0: 54.3},
-        'crossing_with_yield_signs': {0.0: 0, 5.0: 6.2, 10.0: 17.3, 15.0: 33.3},
-        'crossing_with_traffic_lights': {0.0: 0, 5.0: 6.2, 10.0: 17.3, 15.0: 33.3, 20.0: 58}
-    },
-    'carla': {
-        'merging': {0.0: 0, 5.0: 0.8, 10.0: 6.8, 15.0: 15.8},
-        'lane_change': {5.0: 7.0, 10.0: 10.0, 15.0: 15.8, 20.0: 27},
-        'crossing_with_yield_signs': {0.0: 0.0, 5.0: 0.8, 10.0: 6.8, 15.0: 15.8},
-        'crossing_with_traffic_lights': {0.0: 0.0, 5.0: 1.8, 10.0: 6.8, 15.0: 15.8, 20.0: 26.0}
-    },
-    'behavior': {
-        'merging': {0.0: 0, 5.0: 0.8, 10.0: 6.8, 15.0: 15.8},
-        'lane_change': {4.0: 7.0, 5.0: 7.0, 8.0: 10.0, 10.0: 10.0, 15.0: 15.8, 20.0: 27},
-        'crossing_with_yield_signs': {0.0: 0.0, 5.0: 0.8, 10.0: 6.8, 15.0: 15.8},
-        'crossing_with_traffic_lights': {0.0: 0.0, 5.0: 1.8, 10.0: 6.8, 15.0: 15.8, 20.0: 26.0}
-    },
-    'lgsvl': {
-        'merging': {0.0: 0.0, 5.0: 1.3, 10.0: 2.6, 15.0: 3.8},
-        'lane_change': {5.0: 1.3, 10.0: 2.6, 15.0: 3.8, 20.0: 5.1},
-        'crossing_with_yield_signs': {0.0: 0.05, 5.0: 1.3, 10.0: 2.6, 15.0: 3.8},
-        'crossing_with_traffic_lights': {0.0: 0.05, 5.0: 1.3, 10.0: 2.6, 15.0: 3.8, 20.0: 5.1}
-    }
-}
+finly_tuned_xe = finely_tuned_xe_wrapper(args.autopilot, args.vista_type, args.ve)
 
 if args.vista_type in ['merging', 'crossing_with_yield_signs']:
-    command = f'bazel-bin/src/simulator/adapter/{args.autopilot}/{args.vista_type} -ve {args.ve} -xe {FINELY_TUNED_XE[args.autopilot][args.vista_type][args.ve]} -xf {args.xf} -xa {args.xa}'
+    command = f'bazel-bin/src/simulator/adapter/{args.autopilot}/{args.vista_type} -ve {args.ve} -xe {finly_tuned_xe} -xf {args.xf} -xa {args.xa}'
 elif args.vista_type == 'lane_change':
-    command = f'bazel-bin/src/simulator/adapter/{args.autopilot}/{args.vista_type} -ve {args.ve} -xff {FINELY_TUNED_XE[args.autopilot][args.vista_type][args.ve]} -xf {args.xf} -xa {args.xa}'
+    command = f'bazel-bin/src/simulator/adapter/{args.autopilot}/{args.vista_type} -ve {args.ve} -xff {finly_tuned_xe} -xf {args.xf} -xa {args.xa}'
 elif args.vista_type == 'crossing_with_traffic_lights':
-    command = f'bazel-bin/src/simulator/adapter/{args.autopilot}/{args.vista_type} -ve {args.ve} -xe {FINELY_TUNED_XE[args.autopilot][args.vista_type][args.ve]} -xf {args.xf}'
+    command = f'bazel-bin/src/simulator/adapter/{args.autopilot}/{args.vista_type} -ve {args.ve} -xe {finly_tuned_xe} -xf {args.xf}'
 else:
     raise ValueError(f'Invalid vista type: {args.vista_type}')
 
@@ -120,6 +87,15 @@ oracle_command = f'bazel-bin/src/oracle/{args.autopilot.split("-")[0]}/{args.vis
 simulation_start = time.time()
 result = subprocess.run(command.split(), shell=False, stdout=subprocess.PIPE, stderr=(None if args.log else subprocess.PIPE), text=True)
 simulation_end = time.time()
+
+try:
+    result_dict = json.loads(result.stdout)
+    if args.scenario_save_path:
+        with open(args.scenario_save_path, 'w') as f:
+            f.write(result.stdout)
+except json.JSONDecodeError:
+    loguru.logger.error(f'Error occur during the simulation. Please retry or add --log option for more information. Cmd: {command}')
+    exit()
 
 try:
     loguru.logger.info('Start running the simulation')

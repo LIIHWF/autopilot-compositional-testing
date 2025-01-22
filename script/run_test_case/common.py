@@ -7,7 +7,7 @@ class PathManager:
         self.ve = ve
         
     def verdict_dir(self):
-        save_dir = f'test_result/{self.autopilot}/{self.vista}/ve={int(self.ve + 0.1)}'
+        save_dir = f'test_result/verdict/{self.autopilot}/{self.vista}/ve={round(self.ve, 1)}'
         return save_dir
 
     def verdict_path(self, test_case):

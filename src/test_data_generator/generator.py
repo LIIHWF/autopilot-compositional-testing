@@ -9,7 +9,7 @@ import numpy as np
 from typing import Literal
 
 
-parser = argparse.ArgumentParser('Run a batch of test cases')
+parser = argparse.ArgumentParser('Test data generator')
 parser.add_argument('autopilot', type=str, help='autopilot to test', choices=['apollo', 'autoware', 'carla', 'lgsvl', 'apollo-40', 'behavior'])
 parser.add_argument('vista_type', type=str, help='type of vista', choices=['merging', 'lane_change', 'crossing_with_yield_signs', 'crossing_with_traffic_lights'])
 parser.add_argument('-ve', required=True, type=float, help='speed of the ego vehicle')
@@ -17,15 +17,25 @@ parser.add_argument('-min_xa', type=float, help='minimum xa to be tested', defau
 parser.add_argument('-max_xa', type=float, help='maximum xa to be tested', default=320)
 parser.add_argument('-min_xf', type=float, help='minimum xf to be tested', default = 0)
 parser.add_argument('-max_xf', type=float, help='maximum xf to be tested', default = 320)
-parser.add_argument('-xa_step', type=float, help='step size for xa', default = 10)
+parser.add_argument('-xa_step', type=float, help='step size for xa', default = 40)
 parser.add_argument('-xf_step', type=float, help='step size for xf', default = 40)
-parser.add_argument('-xa_min_gap', type=float, help='minimum gap between xa values', default=1)
+parser.add_argument('-xa_min_gap', type=float, help='minimum gap between xa values', default=5)
 parser.add_argument('-xf_min_gap', type=float, help='minimum gap between xf values', default=5)
+parser.add_argument('--complete-refinement', action='store_true', help='perform complete refinement')
 parser.add_argument('--no-run', action='store_true', help='do not run the test cases')
 parser.add_argument('--timeout', type=float, help='timeout for each test case', default=None)
 
 
 args = parser.parse_args()
+
+
+def critical_value_wrapper(autopilot, vista_type, ve):
+    output = subprocess.check_output(['bazel-bin/src/test_data_generator/critical_value', autopilot, vista_type, str(ve), str(80/3.6), '24'])
+    return json.loads(output)
+
+def finely_tuned_xe_wrapper(autopilot, vista, ve):
+    output = subprocess.check_output(['bazel-bin/src/test_data_generator/finely_tuned_xe', autopilot, vista, str(ve)])
+    return json.loads(output)
 
 class PathManager:
     def __init__(self, autopilot, vista, ve):
@@ -34,7 +44,7 @@ class PathManager:
         self.ve = ve
         
     def verdict_dir(self):
-        save_dir = f'test_result/{self.autopilot}/{self.vista}/ve={int(self.ve + 0.1)}'
+        save_dir = f'test_result/verdict/{self.autopilot}/{self.vista}/ve={round(self.ve, 1)}'
         return save_dir
 
     def verdict_path(self, test_case):
@@ -44,6 +54,18 @@ class PathManager:
             file_name = f'xf={round(test_case["xf"], 1)};xa={round(test_case["xa"], 1)}.json'
         verdict = os.path.join(self.verdict_dir(), file_name)
         return verdict
+    
+    def scenario_dir(self):
+        save_dir = f'test_result/scenario/{self.autopilot}/{self.vista}/ve={round(self.ve, 1)}'
+        return save_dir
+    
+    def scenario_path(self, test_case):
+        if self.vista == 'crossing_with_traffic_lights':
+            file_name = f'xf={round(test_case["xf"], 1)}.json'
+        else:
+            file_name = f'xf={round(test_case["xf"], 1)};xa={round(test_case["xa"], 1)}.json'
+        scenario = os.path.join(self.scenario_dir(), file_name)
+        return scenario
     
     def test_case_path(self):
         path = f'test_case/{self.autopilot}_{self.vista}.json'
@@ -58,6 +80,45 @@ def eq(a, b):
         return False
     return abs(a - b) < 1e-3
 
+
+ISSUE_MAP = {
+    'BOTH_IN_JUNCTION': 'p1',
+    'EGO_STOPPED': 'p2',
+    'RUN_RED_LIGHT': 'p3',
+    'IN_JUNCTION_WHEN_SIDE_GREEN': 'p4'
+}
+
+
+def simple_verdict(result):
+    if result['verdict'] == 'collision':
+        verdict = 'A'
+    elif result['verdict'] == 'progress':
+        verdict = 'P'
+    elif result['verdict'] == 'caution':
+        verdict = 'C'
+    elif result['verdict'] == 'planning_failed':
+        verdict = 'Fsw'
+    elif result['verdict'] == 'blocking':
+        verdict = 'Blk'
+    else:
+        return result['verdict']
+        # raise ValueError(f'Unknown verdict: {result["verdict"]}')
+    if verdict == 'A':
+        if 'ego_fault' in result['safety_issues']:
+            verdict += 'e'
+        if 'arriving_fault' in result['safety_issues']:
+            verdict += 'a'
+    elif verdict in ['P', 'C']:
+        if len(result['safety_issues']) == 0:
+            verdict += 'S'
+        else:
+            verdict += 'U'
+            for issue in ISSUE_MAP:
+                if issue in result['safety_issues']:
+                    verdict += ISSUE_MAP[issue]
+    return verdict
+
+
 def query_result(test_case):
     verdict_path = path_manager.verdict_path(test_case)
     if not os.path.exists(verdict_path):
@@ -65,10 +126,11 @@ def query_result(test_case):
     with open(verdict_path) as f:
         data = json.load(f)
     for key in test_case:
-        if key not in data:
+        if key not in data and key != 'xe':
             return None
-        if abs(test_case[key] - data[key]) > 1e-5:
-            return None
+        # if key in data and abs(test_case[key] - data[key]) > 0.1:
+        #     return None
+    data['verdict'] = simple_verdict(data)
     return data
 
 
@@ -95,8 +157,40 @@ generation_time = 0.0
 num_of_results = 0
 
 
+def dump_running_log():
+    data_list = []
+    result = show_result
+    if not result_manager.results:
+        return
+    for xa in result.get_xa_values():
+        data_list.append([])
+        for xf in result.get_xf_values():
+            verdict = result.get_pivot_table().loc[xa, xf]
+            # check isfeasible
+            if not is_feasible({'ve': args.ve, 'xa': xa, 'xf': xf}):
+                data_list[-1].append('-')
+            elif pd.isna(verdict):
+                data_list[-1].append('pending')
+            else:
+                data_list[-1].append(verdict)
+
+    xas = [round(x, 1) for x in show_result.get_xa_values()]
+    xfs = [round(x, 1) for x in show_result.get_xf_values()]
+    
+    log = {
+        'critical_value': {key: round(value, 1) for key, value in critical_value.items()},
+        'xas': xas,
+        'xfs': xfs,
+        'data': data_list,
+    }
+    
+    with open('test_result/running_log/running.json', 'w') as f:
+        json.dump(log, f, indent=4)
+
 def record_result(result, test_case, refined_xa, refined_xf):
     result_manager.add(result)
+    show_result.add(result)
+    dump_running_log()
     if 'xa' not in test_case:
         if not eq(test_case['xf'], refined_xf) and eq(test_case['xf'], critical_value['xf']):
             grid_result.add(result, True)
@@ -109,8 +203,27 @@ def record_result(result, test_case, refined_xa, refined_xf):
         else:
             grid_result.add(result)
 
+import time
 
 def run_for(test_case, generation_time=0.0, refined_xa=None, refined_xf=None):
+    result = test_case.copy()
+    result['verdict'] = 'Running'
+    show_result.add(result)
+    dump_running_log()
+    # print(show_result.get_pivot_table())
+    # print('----------------------')
+    # try:
+    #     print(grid_result.get_pivot_table())
+    # except Exception as e:
+    #     print(e)
+    # print('----------------------')
+    # try:
+    #     print(result_manager.get_pivot_table())
+    # except Exception as e:
+    #     print(e)
+    if args.no_run:
+        # time.sleep(1)
+        ...
     global total_time, simulation_time, checking_time, num_of_results
     if not is_feasible(test_case):
         loguru.logger.warning(f'({args.autopilot}, {args.vista_type}): Test case {test_case} is not feasible. Skipping...')
@@ -118,37 +231,30 @@ def run_for(test_case, generation_time=0.0, refined_xa=None, refined_xf=None):
     if os.path.exists(path_manager.verdict_path(test_case)):
         loguru.logger.success(f'({args.autopilot}, {args.vista_type}): Test result for {test_case} already exists. Skipping...')
         result = query_result(test_case)
+        assert result
         if result:
             record_result(result, test_case, refined_xa, refined_xf)
             if args.no_run:
-                generation_time = time.time() - start_time
-                simulation_time += result['simulation_time']
-                checking_time += result['checking_time']
-                total_time = generation_time + simulation_time + checking_time
                 num_of_results += 1
-                
-                print(f'Generation time: {generation_time:.2f}s')
-                print(f'Simulation time: {simulation_time:.2f}s')
-                print(f'Checking time: {checking_time:.2f}s')
-                print(f'Total time: {total_time:.2f}s')
-                print(f'Number of results: {num_of_results}')
-                
+                print(show_result.get_pivot_table())
                 print(result_manager.get_pivot_table())
                 
                 if args.timeout is not None and total_time > args.timeout:
                     loguru.logger.warning(f'Timeout reached. Exit...')
-                    exit()
-                
+                    exit()  
         return None
     if args.no_run:
         loguru.logger.warning(f'({args.autopilot}, {args.vista_type}): Test case {test_case} is not found. Exit...')
         return exit()
-    
+
     loguru.logger.info(f'({args.autopilot}, {args.vista_type}): Running test case: {test_case}')
-    
-    command: str = f'timeout 90 bazel-bin/script/run_test_case/run_single {args.autopilot} {args.vista_type} -ve {test_case["ve"]} -xf {test_case["xf"]} --json'
+
+    command: str = f'timeout 120 bazel-bin/script/run_test_case/run_single {args.autopilot} {args.vista_type} -ve {test_case["ve"]} -xf {test_case["xf"]} --json'
     if 'xa' in test_case:
         command += f' -xa {test_case["xa"]}'
+
+    os.makedirs(path_manager.scenario_dir(), exist_ok=True)
+    command += f' --scenario-save-path {path_manager.scenario_path(test_case)}'
 
     global subprocess_obj
     subprocess_obj = subprocess.Popen(command.split(), shell=False, stdout=subprocess.PIPE)
@@ -156,7 +262,6 @@ def run_for(test_case, generation_time=0.0, refined_xa=None, refined_xf=None):
     stdout, stderr = subprocess_obj.communicate()
     try:
         result = json.loads(stdout)
-        result['generation_time'] = generation_time
         os.makedirs(path_manager.verdict_dir(), exist_ok=True)
         with open(path_manager.verdict_path(test_case), 'w') as f:
             json.dump(result, f, indent=4)
@@ -168,25 +273,11 @@ def run_for(test_case, generation_time=0.0, refined_xa=None, refined_xf=None):
         loguru.logger.warning(f'Failed to run test case: {test_case}. Retrying...')   
         return run_for(test_case)
 
-CRITICAL_VALUES = {
-    'apollo-40': {
-        'merging': [{'ve': 0.0, 'xf': 0.0, 'xa': 20.2}, {'ve': 2.0, 'xf': 2.0, 'xa': 28.4}, {'ve': 5.0, 'xf': 7.6, 'xa': 32.5}],
-        'lane_change': [{'ve': 5.0, 'xf': 6.1, 'xa': 50.4}, {'ve': 10.0, 'xf': 17.2, 'xa': 35.3}],
-        'crossing_with_yield_signs': [{'ve': 0.0, 'xf': 15.4, 'xa': 60.0}, {'ve': 5.0, 'xf': 20.2, 'xa': 42.4}],
-        'crossing_with_traffic_lights': [{'ve': 0.0, 'xf': None}, {'ve': 5.0, 'xf': 20.2}, {'ve': 10.0, 'xf': 20.2}]
-    },
-    'behavior': {
-        'merging': [{'ve': 0.0, 'xf': 0.0, 'xa': 5.0}, {'ve': 2.0, 'xf': 2.0, 'xa': 28.4}, {'ve': 5.0, 'xf': 1.2, 'xa': 6.4}],
-        'lane_change': [{'ve': 4.0, 'xf': 0.8, 'xa': 35.1}, {'ve': 8.0, 'xf': 6.9, 'xa': 21.0}],
-        'crossing_with_yield_signs': [{'ve': 0.0, 'xf': 6.9, 'xa': 32.7}, {'ve': 5.0, 'xf': 6.9, 'xa': 22.74}],
-        'crossing_with_traffic_lights': [{'ve': 0.0, 'xf': 6.9}, {'ve': 5.0, 'xf': 6.9}]
-    },
-}
 
 class ResultManager:
     def __init__(self):
         self.results = []
-    
+
     def add(self, result, only_update=False):
         if result['xa'] is None:
             result = {**result, 'xa': -1}
@@ -196,10 +287,11 @@ class ResultManager:
                 return
         if not only_update:
             self.results.append(result)
-        
+
     def get_pd_table(self):
-        return pd.DataFrame(self.results)
-    
+        df = pd.DataFrame(self.results)
+        return df
+
     def get_pivot_table(self):
         return self.get_pd_table().pivot(index='xa', columns='xf', values='verdict')
     
@@ -283,6 +375,26 @@ class ResultManager:
     def max_xf(self):
         return max(self.get_xf_values())
     
+    def all_infeasible_at_min_xa_with_offset(self, offset):
+        xf_values = self.get_xf_values()
+        min_xa = self.min_xa()
+        for xf in xf_values:
+            data = {'ve': args.ve, 'xa': min_xa + offset, 'xf': xf}
+            if is_feasible(data):
+                print(data, 'is feasible')
+                return False
+        return True
+    
+    def all_infeasible_at_min_xf_with_offset(self, offset):
+        xa_values = self.get_xa_values()
+        min_xf = self.min_xf()
+        for xa in xa_values:
+            data = {'ve': args.ve, 'xa': xa, 'xf': min_xf + offset}
+            if is_feasible(data):
+                print(data, 'is feasible')
+                return False
+        return True
+    
     def all_cs_at_min_xa(self):
         return all([pd.isna(x) or (x == 'CS') for x in self.get_pivot_table().loc[self.min_xa()]])
 
@@ -317,28 +429,26 @@ class ResultManager:
         return True
         
 
-
-def find_critical_value():
-    for value in CRITICAL_VALUES[args.autopilot][args.vista_type]:
-        if eq(value['ve'], args.ve):
-            return value
-    else:
-        raise ValueError(f'No critical value found for ve={args.ve}')
-
-critical_value = find_critical_value()
+critical_value = critical_value_wrapper(args.autopilot, args.vista_type, args.ve)
 
 def fill_blank():
     unknown_data = result_manager.get_unknown_data()
     for data in unknown_data:
+        print(data)
         if is_feasible(data):
             run_for(data)    
 
 result_manager = ResultManager()
 grid_result = ResultManager()
+show_result = ResultManager()
 
 for xf in np.arange(args.min_xf, args.max_xf + args.xf_step / 2, args.xf_step):
     for xa in np.arange(args.min_xa, args.max_xa + args.xa_step / 2, args.xa_step):
         grid_result.add({'ve': args.ve, 'xa': xa, 'xf': xf, 'verdict': float('nan')})
+        # result_manager.add({'ve': args.ve, 'xa': xa, 'xf': xf, 'verdict': float('nan')})
+        show_result.add({'ve': args.ve, 'xa': xa, 'xf': xf, 'verdict': float('nan')})
+        
+# show_result.add({'ve': args.ve, 'xa': critical_value['xa'], 'xf': critical_value['xf'], 'verdict': float('nan')})
 
 
 xa_list = grid_result.get_xa_values()
@@ -347,6 +457,7 @@ xf_list = grid_result.get_xf_values()
 xa1, xa2 = None, None
 xf1, xf2 = None, None
 
+print(critical_value)
 
 # find the range of xa and xf that contains the critical value
 if args.vista_type != 'crossing_with_traffic_lights':
@@ -382,6 +493,7 @@ else:
             has_new = run_for({'ve': args.ve, 'xa': xa, 'xf': xf})
 
 fill_blank()
+# exit()
 
 def run_for_xa(xa, xfs=None):
     assert args.vista_type != 'crossing_with_traffic_lights'
@@ -428,7 +540,7 @@ def extend_min_xa():
         run_for_xa(extended_min_xa)
         return True
     return False
-            
+
 def extend_max_xa():
     if not eq(result_manager.max_xa(), args.max_xa):
         extended_max_xa = min(result_manager.max_xa() + args.xa_step, args.max_xa)
@@ -450,7 +562,6 @@ def extend_max_xf():
         return True
     return False
 
-
 while True:
     has_refined = do_refinement()
     
@@ -458,26 +569,30 @@ while True:
         extended = False
         
         if args.vista_type != 'crossing_with_traffic_lights':
-            if not result_manager.all_cs_at_min_xa() and not eq(result_manager.min_xa(), args.min_xa):
+            if not result_manager.all_cs_at_min_xa() and \
+                not eq(result_manager.min_xa(), args.min_xa) and \
+                    not result_manager.all_infeasible_at_min_xa_with_offset(max(args.min_xa - result_manager.min_xa(), -args.xa_step)):
                 loguru.logger.info(f'all_cs_at_min_xa is False, extending min_xa')
                 extend_min_xa()
                 extended = True
-            
+
             if (not result_manager.same_for_two_max_xa() or result_manager.all_cs_at_max_xa()) and not eq(result_manager.max_xa(), args.max_xa):
                 loguru.logger.info(f'same_for_two_max_xa is False, extending max_xa')
                 extend_max_xa()
                 extended = True
 
-        if not result_manager.all_cs_at_min_xf() and not eq(result_manager.min_xf(), args.min_xf):
+        if not result_manager.all_cs_at_min_xf() and \
+            not eq(result_manager.min_xf(), args.min_xf) and \
+                not result_manager.all_infeasible_at_min_xf_with_offset(max(args.min_xf - result_manager.min_xf(), -args.xf_step)):
             loguru.logger.info(f'all_cs_at_min_xf is False, extending min_xf')
             extend_min_xf()
             extended = True
-            
+
         if (not result_manager.same_for_two_max_xf() or result_manager.all_cs_at_max_xf()) and not eq(result_manager.max_xf(), args.max_xf):
             loguru.logger.info(f'same_for_two_max_xf is False, extending max_xf')
             extend_max_xf()
             extended = True
-        
+
         if not extended:
             loguru.logger.info('No extension is needed by rules. Extend all boundaries')
             if args.vista_type != 'crossing_with_traffic_lights':
@@ -485,8 +600,11 @@ while True:
                 extended |= extend_max_xa()
             extended |= extend_min_xf()
             extended |= extend_max_xf()
-            
+
             if not extended:
+                if not args.complete_refinement:
+                    loguru.logger.info('No extension is needed. Exit...')
+                    exit()
                 loguru.logger.info("Boundaries reach the limits. Refining large gaps")
                 if args.vista_type != 'crossing_with_traffic_lights':
                     xa_refine_values, xa_largest_gap = result_manager.get_refine_values_for_largest_gap('xa')

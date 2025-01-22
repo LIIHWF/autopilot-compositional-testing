@@ -13,6 +13,43 @@ def round_result(result):
             result[key] = round(result[key], 1)
     return result
 
+
+ISSUE_MAP = {
+    'BOTH_IN_JUNCTION': 'p1',
+    'EGO_STOPPED': 'p2',
+    'RUN_RED_LIGHT': 'p3',
+    'IN_JUNCTION_WHEN_SIDE_GREEN': 'p4'
+}
+
+def simple_verdict(result):
+    if result['verdict'] == 'collision':
+        verdict = 'A'
+    elif result['verdict'] == 'progress':
+        verdict = 'P'
+    elif result['verdict'] == 'caution':
+        verdict = 'C'
+    elif result['verdict'] == 'planning_failed':
+        verdict = 'Fsw'
+    elif result['verdict'] == 'blocking':
+        verdict = 'Blk'
+    else:
+        raise ValueError(f'Unknown verdict: {result["verdict"]}')
+    if verdict == 'A':
+        if 'ego_fault' in result['safety_issues']:
+            verdict += 'e'
+        if 'arriving_fault' in result['safety_issues']:
+            verdict += 'a'
+    elif verdict in ['P', 'C']:
+        if len(result['safety_issues']) == 0:
+            verdict += 'S'
+        else:
+            verdict += 'U'
+            for issue in ISSUE_MAP:
+                if issue in result['safety_issues']:
+                    verdict += ISSUE_MAP[issue]
+    return verdict
+
+
 def verdict_color(verdict):
     if not isinstance(verdict, str):
         return 'white'
@@ -57,8 +94,9 @@ class Dashboard:
         for key in test_case:
             if key not in data:
                 return None
-            if abs(test_case[key] - data[key]) > 1e-5:
+            if abs(test_case[key] - data[key]) > 1e-1:
                 return None
+        data['verdict'] = simple_verdict(data)
         return data
 
     def _init_table(self):
@@ -77,7 +115,7 @@ class Dashboard:
                     results.append(round_result(result))
                 else:
                     result = test_case.copy()
-                    result['verdict'] = ''
+                    result['verdict'] = 'pending'
                     results.append(round_result(result))
         df = pd.DataFrame(results)
         if self.vista != 'crossing_with_traffic_lights':

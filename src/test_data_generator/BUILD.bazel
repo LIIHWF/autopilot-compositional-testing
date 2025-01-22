@@ -12,3 +12,16 @@ py_binary(
     name = "generator",
     srcs = ["generator.py"],
 )
+
+py_binary(
+    name = "critical_value",
+    srcs = ["critical_value.py"],
+    deps = [
+        "//src/dynamics",
+    ],
+)
+
+py_binary(
+    name = "finely_tuned_xe",
+    srcs = ["finely_tuned_xe.py"],
+)

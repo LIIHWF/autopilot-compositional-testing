@@ -1,0 +1,20 @@
+py_library(
+    name = "dynamics_lib",
+    srcs = [
+        "common.py",
+        "autoware_dynamics.py",
+        "apollo_dynamics.py",
+        "carla_dynamics.py",
+        "lgsvl_dynamics.py",
+        "experimental_dynamics.py"
+    ]
+)
+
+py_library(
+    name = "dynamics",
+    srcs = ["__init__.py"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":dynamics_lib",
+    ],
+)

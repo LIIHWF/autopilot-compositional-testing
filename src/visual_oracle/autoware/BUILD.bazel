@@ -1,0 +1,32 @@
+py_binary(
+    name = "merging",
+    srcs = ["merging.py"],
+    deps = [
+        "//src/simulator/autoware",
+        "//src/dynamics",
+    ]
+)
+
+py_binary(
+    name = "lane_change",
+    srcs = ["lane_change.py"],
+    deps = [
+        "//src/simulator/autoware"
+    ]
+)
+
+py_binary(
+    name = "crossing_with_yield_signs",
+    srcs = ["crossing_with_yield_signs.py"],
+    deps = [
+        "//src/simulator/autoware"
+    ]
+)
+
+py_binary(
+    name = "crossing_with_traffic_lights",
+    srcs = ["crossing_with_traffic_lights.py"],
+    deps = [
+        "//src/simulator/autoware"
+    ]
+)

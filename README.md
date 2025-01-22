@@ -1,4 +1,4 @@
-# CCTest: Critical Configuration Testing for Autonomous Driving Systems
+# Compositional Testing for Autopilots
 
 This is the codebase for the work: [https://arxiv.org/abs/2405.16914](https://arxiv.org/abs/2405.16914)
 
@@ -111,3 +111,22 @@ $ script/run_single.sh [autopilot] [vista_type] -ve [number] -xf [number] -xa [n
 ```
 
 where `autopilot`, `vista_type`, and `ve` are taken from the same range as in the batch mode experiment. `xf` and `xa` can be taken from 0 to 320.
+
+## Web UI
+
+Run the following instruction to start the Web UI at `http://localhost:5000`:
+
+```
+$ script/start_server.sh
+```
+### Result viewer
+
+![Result viewer](docs/result_viewer.png)
+
+### Automatic generation
+
+![Automatic generation](docs/automatic_generation.png)
+
+### Run configuration
+
+![Run configuration](docs/run_configuration.png)
