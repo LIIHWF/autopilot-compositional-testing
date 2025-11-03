@@ -130,3 +130,7 @@ $ script/start_server.sh
 ### Run configuration
 
 ![Run configuration](docs/run_configuration.png)
+
+## Testing End-to-End Autopilot
+
+Please refer to: [https://github.com/LIIHWF/testing-end-to-end-ai-autopilots](https://github.com/LIIHWF/testing-end-to-end-ai-autopilots)
