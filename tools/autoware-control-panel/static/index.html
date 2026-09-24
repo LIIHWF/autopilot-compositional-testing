@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Autoware Control</title>
+  <meta name="description" content="Autoware、CARLA 与 CCTest 本地控制面板">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">AUTOPILOT LAB / LOCAL</p>
+        <h1>CCTest Control</h1>
+      </div>
+      <div class="clock" id="clock">--:--:--</div>
+    </header>
+
+    <section class="stack-control" aria-label="环境一键控制">
+      <div><p class="eyebrow">ENVIRONMENT SEQUENCE</p><h2>完整测试环境</h2><p id="stack-detail">正在检查组件状态…</p></div>
+      <div class="stack-actions"><span class="stack-state" id="stack-state">检查中</span><button id="start-stack">一键启动</button><button id="stop-stack" class="secondary">一键关闭</button></div>
+    </section>
+
+    <section class="systems" aria-label="系统控制">
+      <article class="system-card" data-component="carla">
+        <div class="card-head"><span class="number">01</span><span class="status"><i></i><b>检查中</b></span></div>
+        <h2>CARLA</h2><p class="detail">Simulator / port 2000</p>
+        <div class="actions"><button class="start">启动</button><button class="stop secondary">关闭</button></div>
+      </article>
+      <article class="system-card" data-component="v1">
+        <div class="card-head"><span class="number">02</span><span class="status"><i></i><b>检查中</b></span></div>
+        <h2>Autoware v1</h2><p class="detail">ROS domain 1</p>
+        <div class="actions"><button class="start">启动</button><button class="stop secondary">关闭</button></div>
+      </article>
+      <article class="system-card" data-component="v2">
+        <div class="card-head"><span class="number">03</span><span class="status"><i></i><b>检查中</b></span></div>
+        <h2>Autoware v2</h2><p class="detail">ROS domain 2</p>
+        <div class="actions"><button class="start">启动</button><button class="stop secondary">关闭</button></div>
+      </article>
+    </section>
+
+    <section class="recording-panel">
+      <div class="section-title">
+        <div><p class="eyebrow">ROS 2 BAG</p><h2>Topic 录制</h2></div>
+        <div class="recording-head"><label class="switch"><input type="checkbox" id="auto-record"><span></span><b>随单用例自动录制</b></label><span class="recording-state" id="recording-state">未录制</span></div>
+      </div>
+      <form id="recording-form">
+        <div class="recording-grid">
+          <label>Autoware 实例<select name="instance"><option value="v1">v1 · ROS domain 1</option><option value="v2">v2 · ROS domain 2</option></select></label>
+          <label>宿主机保存目录<input name="output_dir" value="/home/ray/AutowareRecordings" required></label>
+          <label>录制名称<input name="name" placeholder="留空则自动生成"></label>
+          <label>录制范围<select name="scope"><option value="all">全部 topic</option><option value="selected">选择 topic</option></select></label>
+        </div>
+        <div class="topic-picker" id="topic-picker" hidden>
+          <div class="topic-toolbar"><p>选择需要写入 rosbag 的 topic</p><button type="button" class="secondary" id="load-topics">读取 Topic</button></div>
+          <div class="topic-list" id="topic-list"><p class="empty">点击“读取 Topic”获取当前实例的话题。</p></div>
+        </div>
+        <div class="form-actions"><button type="submit" class="run">开始录制 <span>●</span></button><button type="button" id="stop-recording" class="secondary">停止并保存</button></div>
+      </form>
+    </section>
+
+    <section class="workspace">
+      <article class="test-panel">
+        <div class="section-title"><div><p class="eyebrow">RUN CONFIGURATION</p><h2>启动 CCTest</h2></div><span class="test-badge" id="test-state">空闲</span></div>
+        <form id="test-form">
+          <label>场景<select name="vista"><option value="merging">Merging</option><option value="lane_change">Lane change</option><option value="crossing_with_yield_signs">Yield signs</option><option value="crossing_with_traffic_lights">Traffic lights</option></select></label>
+          <div class="field-row"><label>初始速度 ve<input name="ve" type="number" step="any" value="5" required></label><label>前车距离 xf<input name="xf" type="number" step="any" value="5.3" required></label><label id="xa-label">来车距离 xa<input name="xa" type="number" step="any" value="80.7"></label></div>
+          <label class="check"><input name="verbose" type="checkbox" checked><span>显示详细运行日志</span></label>
+          <div class="form-actions"><button type="submit" class="run">运行单用例 <span>→</span></button><button type="button" id="stop-test" class="secondary">停止测试</button></div>
+        </form>
+      </article>
+
+      <article class="log-panel">
+        <div class="section-title"><div><p class="eyebrow">LIVE OUTPUT</p><h2>运行日志</h2></div><select id="log-target" aria-label="日志来源"><option value="cctest">CCTest</option><option value="v1">Autoware v1</option><option value="v2">Autoware v2</option><option value="carla">CARLA</option></select></div>
+        <pre id="logs" aria-live="polite">等待日志…</pre>
+      </article>
+    </section>
+    <div class="toast" id="toast" role="status"></div>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -20,6 +20,7 @@ This is the codebase for the work: [https://arxiv.org/abs/2405.16914](https://ar
 
 This codebase requires a Linux computer with GPU capacity needed by the Simulators. Ubuntu 22.04 operating system and an NVIDIA GeForce RTX 3090 GPU are recommended.
 
+
 ## Setup Instructions
 
 To simulate each autopilot, please clone this repository first. Our codebase has the following software dependencies:
